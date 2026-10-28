@@ -2,7 +2,7 @@ name: Build Heretic Ollama Image
 
 on:
   push:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:
 
 jobs:

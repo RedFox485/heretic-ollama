@@ -17,3 +17,21 @@ PARAMETER temperature 1
 PARAMETER top_p 0.95
 PARAMETER top_k 20
 PARAMETER presence_penalty 1.5
+EOF
+
+# Build the model into Ollama's model store - wait for server to be ready
+RUN ollama serve & \
+    PID=$! && \
+    sleep 5 && \
+    for i in $(seq 1 30); do \
+        if curl -sf http://localhost:11434 > /dev/null 2>&1; then \
+            echo "Ollama server ready!"; \
+            break; \
+        fi; \
+        sleep 2; \
+    done && \
+    ollama create gppa-heretic -f /tmp/Modelfile.heretic && \
+    kill $PID
+
+EXPOSE 11434
+CMD ["serve"]

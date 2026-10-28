@@ -11,7 +11,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-      id-token: write
     
     steps:
       - name: Checkout
@@ -27,26 +26,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/${{ github.repository }}
-          tags: |
-            type=sha
-            type=ref,event=branch
-            type=raw,value=latest,enable={{is_default_branch}}
-
       - name: Build and push
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ghcr.io/${{ github.repository }}/heretic-ollama:latest
           platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Output image
-        run: echo "Image: ghcr.io/${{ github.repository }}:latest"

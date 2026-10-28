@@ -26,7 +26,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Build and push to GHCR
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -34,17 +34,24 @@ jobs:
           tags: ghcr.io/redfox485/heretic-ollama:latest
           platforms: linux/amd64
 
-      - name: Make package public
+      - name: Make GHCR package public
         run: |
-          # Wait a moment for package to be created
-          sleep 10
-          # Get package ID and make public
-          PACKAGE_ID=$(gh api repos/RedFox485/heretic-ollama/packages --jq '.[0].id')
+          # Wait for package to be created
+          sleep 30
+          PACKAGE_ID=$(gh api repos/RedFox485/heretic-ollama/packages --jq '.[] | select(.name == "heretic-ollama") | .id')
           if [ -n "$PACKAGE_ID" ]; then
             gh api -X PUT repos/RedFox485/heretic-ollama/packages/$PACKAGE_ID/visibility -F visibility=public
             echo "Package made public"
           else
-            echo "Package not found yet"
+            echo "Package not found yet, trying again in 30s"
+            sleep 30
+            PACKAGE_ID=$(gh api repos/RedFox485/heretic-ollama/packages --jq '.[] | select(.name == "heretic-ollama") | .id')
+            if [ -n "$PACKAGE_ID" ]; then
+              gh api -X PUT repos/RedFox485/heretic-ollama/packages/$PACKAGE_ID/visibility -F visibility=public
+              echo "Package made public on retry"
+            else
+              echo "Package still not found"
+            fi
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

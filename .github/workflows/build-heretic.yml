@@ -31,5 +31,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}/heretic-ollama:latest
+          tags: ghcr.io/redfox485/heretic-ollama:latest
           platforms: linux/amd64

@@ -33,3 +33,18 @@ jobs:
           push: true
           tags: ghcr.io/redfox485/heretic-ollama:latest
           platforms: linux/amd64
+
+      - name: Make package public
+        run: |
+          # Wait a moment for package to be created
+          sleep 10
+          # Get package ID and make public
+          PACKAGE_ID=$(gh api repos/RedFox485/heretic-ollama/packages --jq '.[0].id')
+          if [ -n "$PACKAGE_ID" ]; then
+            gh api -X PUT repos/RedFox485/heretic-ollama/packages/$PACKAGE_ID/visibility -F visibility=public
+            echo "Package made public"
+          else
+            echo "Package not found yet"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
